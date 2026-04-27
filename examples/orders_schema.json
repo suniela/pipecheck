@@ -1,0 +1,40 @@
+{
+  "name": "orders",
+  "version": "1.0",
+  "columns": [
+    {
+      "name": "order_id",
+      "type": "integer",
+      "nullable": false,
+      "unique": true
+    },
+    {
+      "name": "customer_name",
+      "type": "string",
+      "nullable": false
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "nullable": false,
+      "allowed_values": ["pending", "processing", "shipped", "delivered", "cancelled"]
+    },
+    {
+      "name": "amount",
+      "type": "float",
+      "nullable": false,
+      "min_value": 0.0,
+      "max_value": 1000000.0
+    },
+    {
+      "name": "created_at",
+      "type": "datetime",
+      "nullable": false
+    },
+    {
+      "name": "notes",
+      "type": "string",
+      "nullable": true
+    }
+  ]
+}
