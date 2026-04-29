@@ -47,6 +47,29 @@ class DataFrameProfile:
             "columns": [c.as_dict() for c in self.columns],
         }
 
+    def get_column(self, name: str) -> Optional[ColumnProfile]:
+        """Return the :class:`ColumnProfile` for *name*, or ``None`` if not found."""
+        for col in self.columns:
+            if col.name == name:
+                return col
+        return None
+
+
+def _profile_numeric(series: pd.Series) -> tuple[Any, Any, Optional[float]]:
+    """Return (min, max, mean) for a numeric series, ignoring nulls."""
+    non_null = series.dropna()
+    if non_null.empty:
+        return None, None, None
+    return non_null.min(), non_null.max(), float(non_null.mean())
+
+
+def _profile_datetime(series: pd.Series) -> tuple[Any, Any]:
+    """Return (min, max) as ISO strings for a datetime series, ignoring nulls."""
+    non_null = series.dropna()
+    if non_null.empty:
+        return None, None
+    return str(non_null.min()), str(non_null.max())
+
 
 def profile(df: pd.DataFrame) -> DataFrameProfile:
     """Compute a :class:`DataFrameProfile` for the given DataFrame."""
@@ -64,16 +87,9 @@ def profile(df: pd.DataFrame) -> DataFrameProfile:
         mean_val: Optional[float] = None
 
         if pd.api.types.is_numeric_dtype(series):
-            non_null = series.dropna()
-            if not non_null.empty:
-                min_val = non_null.min()
-                max_val = non_null.max()
-                mean_val = float(non_null.mean())
+            min_val, max_val, mean_val = _profile_numeric(series)
         elif pd.api.types.is_datetime64_any_dtype(series):
-            non_null = series.dropna()
-            if not non_null.empty:
-                min_val = str(non_null.min())
-                max_val = str(non_null.max())
+            min_val, max_val = _profile_datetime(series)
 
         col_profiles.append(
             ColumnProfile(
